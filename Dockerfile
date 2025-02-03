@@ -1,10 +1,11 @@
 FROM alpine:latest
 
-# Install Python, pip, and common build dependencies for Python libraries
-RUN apk add --no-cache --update python3 py3-pip bash gcc musl-dev libffi-dev
-
 # Copy application dependencies
 COPY ./webapp/requirements.txt /tmp/requirements.txt
+
+# Install Python, pip, and common build dependencies for Python libraries
+RUN python3 -m venv /opt/venv && . /opt/venv/bin/activate && pip install --no-cache-dir -r /tmp/requirements.txt
+
 
 # Install dependencies
 RUN pip3 install --no-cache-dir -q -r /tmp/requirements.txt
