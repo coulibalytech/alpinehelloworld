@@ -1,4 +1,4 @@
-FROM alpine:latest
+FROM python:3.10-slim
 
 # Copy application dependencies
 COPY ./webapp/requirements.txt /tmp/requirements.txt
