@@ -3,11 +3,8 @@ FROM alpine:latest
 # Copy application dependencies
 COPY ./webapp/requirements.txt /tmp/requirements.txt
 
-RUN apk add --no-cache python3 py3-pip && python3 -m ensurepip && pip3 install --upgrade pip
-
 # Install Python, pip, and common build dependencies for Python libraries
-RUN python3 -m venv /opt/venv && . /opt/venv/bin/activate 
-
+RUN apk add --no-cache python3 py3-pip && python3 -m ensurepip && pip3 install --upgrade pip
 
 # Install dependencies
 RUN pip3 install --no-cache-dir -q -r /tmp/requirements.txt
