@@ -1,25 +1,22 @@
-#Grab the latest alpine image
 FROM alpine:latest
 
-# Install python and pip
-RUN apk add --no-cache --update python3 py3-pip bash
-ADD ./webapp/requirements.txt /tmp/requirements.txt
+# Install Python, pip, and common build dependencies for Python libraries
+RUN apk add --no-cache --update python3 py3-pip bash gcc musl-dev libffi-dev
+
+# Copy application dependencies
+COPY ./webapp/requirements.txt /tmp/requirements.txt
 
 # Install dependencies
 RUN pip3 install --no-cache-dir -q -r /tmp/requirements.txt
 
-# Add our code
-ADD ./webapp /opt/webapp/
+# Copy application code
+COPY ./webapp /opt/webapp/
 WORKDIR /opt/webapp
 
-# Expose is NOT supported by Heroku
-# EXPOSE 5000 		
-
-# Run the image as a non-root user
+# Add and switch to a non-root user
 RUN adduser -D myuser
 USER myuser
 
-# Run the app.  CMD is required to run on Heroku
-# $PORT is set by Heroku			
-CMD gunicorn --bind 0.0.0.0:$PORT wsgi 
+# Set the default command to run the application
+CMD gunicorn --bind 0.0.0.0:$PORT wsgi
 
