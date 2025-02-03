@@ -1,13 +1,13 @@
-FROM 3.10-alpine
+FROM alpine:latest
 
 # Install Python, pip, and common build dependencies for Python libraries
-RUN apk add --no-cache --update python3 py3-pip bash && pip3 install pipx && pipx ensurepath
+RUN apk add --no-cache --update python3 py3-pip bash gcc musl-dev libffi-dev
 
 # Copy application dependencies
 COPY ./webapp/requirements.txt /tmp/requirements.txt
 
 # Install dependencies
-RUN pipx runpip python3 install --no-cache-dir -q -r /tmp/requirements.txt
+RUN pip3 install --no-cache-dir -q -r /tmp/requirements.txt
 
 # Copy application code
 COPY ./webapp /opt/webapp/
@@ -19,4 +19,3 @@ USER myuser
 
 # Set the default command to run the application
 CMD gunicorn --bind 0.0.0.0:$PORT wsgi
-
