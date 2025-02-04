@@ -90,6 +90,12 @@ pipeline{
                       echo "========executing Push image in production and deploy it========"
                       script{
                         sh '''
+                        sudo apt install -y nodejs
+                        curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+                        sudo apt install -y nodejs
+                        npm uninstall -g heroku
+                        npm install -g heroku
+                        heroku version
                         heroku container:login
                         heroku create $PRODUCTION || echo "project already exist"
                         heroku container:push -a $PRODUCTION web
