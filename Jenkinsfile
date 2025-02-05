@@ -59,6 +59,7 @@ pipeline{
                 }
 
                 stage("Login to Docker Hub Registry") {
+                    agent any      
                     steps {
                             script {
                                 echo "Connexion au registre Docker hub"
@@ -71,6 +72,7 @@ pipeline{
                 }
 
                 stage('Push Image in docker hub') {
+                        agent any
                         steps {
                             script {
                                 echo "Pousser l'image Docker vers le registre..."
