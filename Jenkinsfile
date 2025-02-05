@@ -23,65 +23,63 @@ pipeline{
           }
           agent none
           stages{
-              stage("Build image"){
-                  agent any
-                  steps{
-                      echo "========executing Build image========"
-                      script{
-                          sh 'docker build -t $REPOSITORY_NAME/$IMAGE_NAME:$IMAGE_TAG .'
-                      }
-                  }
-                  
-              }
-              stage("Run container based on builded image"){
-                  agent any
-                  steps{
-                      echo "========executing Run container based on builded image========"
-                      script{
-                          sh '''
-                          docker run --name $IMAGE_NAME -d -p 80:5000 -e PORT=5000 $REPOSITORY_NAME/$IMAGE_NAME:$IMAGE_TAG
-                          sleep 5
-
-                            '''
-                      }
-                  }
-                  
-              }
-              stage("Test image"){
-                  agent any
-                  steps{
-                      echo "========executing Test image========"
-                      script{
-                          sh 'curl http://172.17.0.1 | grep -q "Hello world!"'
-                      }
-                  }
-                  
-              }
-
-              stage("Login to Docker Hub Registry"){
-                steps {
-                    script {
-                        echo "Connexion au registre Docker hub"
-                       withCredentials([usernamePassword(credentialsId: "${DOCKERHUB_CREDENTIALS}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                        sh "echo ${DOCKER_PASS} | docker login -u ${DOCKER_USER} --password-stdin"
+                stage("Build image") {
+                    agent any
+                    steps{
+                        echo "========executing Build image========"
+                        script{
+                            sh 'docker build -t $REPOSITORY_NAME/$IMAGE_NAME:$IMAGE_TAG .'
+                        }
                     }
+                    
                 }
-              }
+                stage("Run container based on builded image") {
+                    agent any
+                    steps{
+                        echo "========executing Run container based on builded image========"
+                        script{
+                            sh '''
+                            docker run --name $IMAGE_NAME -d -p 80:5000 -e PORT=5000 $REPOSITORY_NAME/$IMAGE_NAME:$IMAGE_TAG
+                            sleep 5
 
-              }
-
-              stage('Push Image in docker hub') {
-                steps {
-                    script {
-                        echo "Pousser l'image Docker vers le registre..."
-                        sh "docker push ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG}"
+                                '''
+                        }
                     }
+                    
                 }
-            }
-        }
+                stage("Test image") {
+                    agent any
+                    steps{
+                        echo "========executing Test image========"
+                        script{
+                            sh 'curl http://172.17.0.1 | grep -q "Hello world!"'
+                        }
+                    }
+                    
+                }
 
+                stage("Login to Docker Hub Registry") {
+                    steps {
+                            script {
+                                echo "Connexion au registre Docker hub"
+                            withCredentials([usernamePassword(credentialsId: "${DOCKERHUB_CREDENTIALS}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                                sh "echo ${DOCKER_PASS} | docker login -u ${DOCKER_USER} --password-stdin"
+                           }
+                       }
+                    }
 
-              stage("Clean container"){
+                }
+
+                stage('Push Image in docker hub') {
+                        steps {
+                            script {
+                                echo "Pousser l'image Docker vers le registre..."
+                                sh "docker push ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG}"
+                            }
+                        }
+                    }
+        
+               stage("Clean container") {
                   agent any
                   steps{
                       echo "========executing Clean container========"
@@ -91,40 +89,40 @@ pipeline{
                         docker rm $IMAGE_NAME
 
                           '''
-                      }
-                  }
+                       }
+                   }
                   
-              }
+                }
             
-              stage("Deploy in staging"){
+                stage("Deploy in staging") {
                   when{
                       expression {GIT_BRANCH == 'origin/master'}
-                  }
+                    }
                   agent any
             
                   steps{
                       echo "========executing Deploy in staging========"
                       
                       script{
-                        sh 'docker save $REPOSITORY_NAME/$IMAGE_NAME:${IMAGE_TAG} > $IMAGE_NAME.tar'
-                        sshagent (credentials: [SSH_CREDENTIALS_ID]) {
-                            sh """
-                            echo "Uploading Docker image to Staging EC2"
-                             ssh ${STAGING_USER}@${STAGING_IP}'
-                                docker stop ${REPOSITORY_NAME}/${IMAGE_NAME}
-                                docker rm ${REPOSITORY_NAME}/${IMAGE_NAME}
-                                docker rmi ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG}
-                                docker pull ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG}
-                                docker run --name staging_${IMAGE_NAME} -d -p 80:${STAGING_HTTP_PORT} -e PORT=${STAGING_HTTP_PORT} ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG}'
-                            """
+                            sh 'docker save $REPOSITORY_NAME/$IMAGE_NAME:${IMAGE_TAG} > $IMAGE_NAME.tar'
+                            sshagent (credentials: [SSH_CREDENTIALS_ID]) {
+                                sh """
+                                echo "Uploading Docker image to Staging EC2"
+                                ssh ${STAGING_USER}@${STAGING_IP}'
+                                    docker stop ${REPOSITORY_NAME}/${IMAGE_NAME}
+                                    docker rm ${REPOSITORY_NAME}/${IMAGE_NAME}
+                                    docker rmi ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG}
+                                    docker pull ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG}
+                                    docker run --name staging_${IMAGE_NAME} -d -p 80:${STAGING_HTTP_PORT} -e PORT=${STAGING_HTTP_PORT} ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG}'
+                                """
 
-                        }
+                            }
                         
-                      }
-                  }
-              }
+                        }
+                    }
+                }
 
-              stage("Deploy in production"){
+                stage("Deploy in production") {
                   when{
                       expression {GIT_BRANCH == 'origin/master'}
                   }
@@ -134,26 +132,25 @@ pipeline{
                       echo "========executing Deploy in production========"
                       
                       script{
-                        sh 'docker save $REPOSITORY_NAME/$IMAGE_NAME:${IMAGE_TAG} > $IMAGE_NAME.tar'
-                        sshagent (credentials: [SSH_CREDENTIALS_ID]) {
-                            sh """
-                            echo "Uploading Docker image to Production EC2"
-                            ssh ${PRODUCTION_USER}@${PRODUCTION_IP} '
-                                docker stop ${REPOSITORY_NAME}/${IMAGE_NAME}
-                                docker rm ${REPOSITORY_NAME}/${IMAGE_NAME}
-                                docker rmi ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG}
-                                docker pull ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG}
-                            docker run --name production_${IMAGE_NAME} -d -p 80:${PRODUCTION_HTTP_PORT} -e PORT=${PRODUCTION_HTTP_PORT} ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG}'
-                            """
+                            sh 'docker save $REPOSITORY_NAME/$IMAGE_NAME:${IMAGE_TAG} > $IMAGE_NAME.tar'
+                            sshagent (credentials: [SSH_CREDENTIALS_ID]) {
+                                sh """
+                                echo "Uploading Docker image to Production EC2"
+                                ssh ${PRODUCTION_USER}@${PRODUCTION_IP} '
+                                    docker stop ${REPOSITORY_NAME}/${IMAGE_NAME}
+                                    docker rm ${REPOSITORY_NAME}/${IMAGE_NAME}
+                                    docker rmi ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG}
+                                    docker pull ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG}
+                                docker run --name production_${IMAGE_NAME} -d -p 80:${PRODUCTION_HTTP_PORT} -e PORT=${PRODUCTION_HTTP_PORT} ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG}'
+                                """
 
-                        }
+                            }
                         
-                      }
+                        }
                   }
-              }
+               }
 
                 
-        
+            }
 
         }
-
