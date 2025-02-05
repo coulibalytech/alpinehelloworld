@@ -5,6 +5,20 @@ pipeline{
               STAGING = "coulibaltech-staging"
               PRODUCTION = "coulibaltech-production"
               REPOSITORY_NAME = "coulibalytech"
+
+            // Staging EC2
+              STAGING_IP = "44.211.159.237"
+              STAGING_USER = "ubuntu"
+              STAGING_DEPLOY_PATH = "/home/ubuntu/app/staging"
+              STAGING_HTTP_PORT = "5000" // Port spécifique pour staging
+
+             // Production EC2
+              PRODUCTION_IP = "34.238.39.56"
+              PRODUCTION_USER = "ubuntu"
+              PRODUCTION_DEPLOY_PATH = "/home/ubuntu/app/production"
+              PRODUCTION_HTTP_PORT = "5000" // Port spécifique pour production
+
+              SSH_CREDENTIALS_ID = "ec2_ssh_credentials"
           }
           agent none
           stages{
@@ -62,47 +76,68 @@ pipeline{
                   }
                   agent any
                   environment {
-                      HEREOKU_API_KEY = credentials('HEROKU_API_KEY')
+                      HEREOKU_API_KEY = credentials('heroku_api_key')
                       }
 
                   steps{
                       echo "========executing Push image in staging and deploy it========"
+                      
                       script{
                         sh '''
-                        heroku container:login
-                        heroku create $STAGING || echo "project already exist"
-                        heroku container:push -a $STAGING web
-                        heroku container:release -a $STAGING web
-                          '''
+                        docker save ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG} > ${IMAGE_NAME}.tar
+                        '''
+                        sshagent (credentials: [SSH_CREDENTIALS_ID]) {
+                            sh '''
+                            echo "Uploading Docker image to Staging EC2"
+                            scp ${IMAGE_NAME}.tar ${STAGING_USER}@${STAGING_IP}:${STAGING_DEPLOY_PATH}/
+
+                            ssh ${STAGING_USER}@${STAGING_IP} '
+                            docker load < ${STAGING_DEPLOY_PATH}/${IMAGE_NAME}.tar &&
+                            docker stop staging_${IMAGE_NAME} || true &&
+                            docker rm staging_${IMAGE_NAME} || true &&
+                            docker run --name staging_${IMAGE_NAME} -d -p 80:${STAGING_HTTP_PORT} -e PORT=${STAGING_HTTP_PORT} ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG}'
+                            '''
+
+                        }
+                        
                       }
                   }
               }
+
               stage("Push image in production and deploy it"){
                   when{
                       expression {GIT_BRANCH == 'origin/master'}
                   }
                   agent any
                   environment {
-                      HEROKU_API_KEY = credentials('heroku_api_key')
+                      HEREOKU_API_KEY = credentials('heroku_api_key')
                       }
 
                   steps{
                       echo "========executing Push image in production and deploy it========"
+                      
                       script{
                         sh '''
-                        sudo apt install -y nodejs
-                        curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
-                        sudo apt install -y nodejs
-                        npm uninstall -g heroku
-                        npm install -g heroku
-                        heroku version
-                        heroku container:login
-                        heroku create $PRODUCTION || echo "project already exist"
-                        heroku container:push -a $PRODUCTION web
-                        heroku container:release -a $PRODUCTION web
-                          '''
+                        docker save ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG} > ${IMAGE_NAME}.tar
+                        '''
+                        sshagent (credentials: [SSH_CREDENTIALS_ID]) {
+                            sh '''
+                            echo "Uploading Docker image to Production EC2"
+                            scp ${IMAGE_NAME}.tar ${PRODUCTION_USER}@${STAGING_IP}:${PRODUCTION_DEPLOY_PATH}/
+
+                            ssh ${PRODUCTION_USER}@${PRODUCTION_IP} '
+                            docker load < ${PRODUCTION_DEPLOY_PATH}/${IMAGE_NAME}.tar &&
+                            docker stop production_${IMAGE_NAME} || true &&
+                            docker rm production_${IMAGE_NAME} || true &&
+                            docker run --name production_${IMAGE_NAME} -d -p 80:${PRODUCTION_HTTP_PORT} -e PORT=${PRODUCTION_HTTP_PORT} ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG}'
+                            '''
+
+                        }
+                        
                       }
                   }
               }
+        
+
           }
 }
