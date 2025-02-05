@@ -79,11 +79,11 @@ pipeline{
                       echo "========executing Push image in staging and deploy it========"
                       
                       script{
-                        sh '''
+                        sh """
                         docker save ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG} > ${IMAGE_NAME}.tar
-                        '''
+                        """
                         sshagent (credentials: [SSH_CREDENTIALS_ID]) {
-                            sh '''
+                            sh """
                             echo "Uploading Docker image to Staging EC2"
                             scp ${IMAGE_NAME}.tar ${STAGING_USER}@${STAGING_IP}:${STAGING_DEPLOY_PATH}/
 
@@ -92,7 +92,7 @@ pipeline{
                             docker stop staging_${IMAGE_NAME} || true &&
                             docker rm staging_${IMAGE_NAME} || true &&
                             docker run --name staging_${IMAGE_NAME} -d -p 80:${STAGING_HTTP_PORT} -e PORT=${STAGING_HTTP_PORT} ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG}'
-                            '''
+                            """
 
                         }
                         
@@ -110,11 +110,11 @@ pipeline{
                       echo "========executing Push image in production and deploy it========"
                       
                       script{
-                        sh '''
+                        sh """
                         docker save ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG} > ${IMAGE_NAME}.tar
-                        '''
+                        """
                         sshagent (credentials: [SSH_CREDENTIALS_ID]) {
-                            sh '''
+                            sh """
                             echo "Uploading Docker image to Production EC2"
                             scp ${IMAGE_NAME}.tar ${PRODUCTION_USER}@${STAGING_IP}:${PRODUCTION_DEPLOY_PATH}/
 
@@ -123,7 +123,7 @@ pipeline{
                             docker stop production_${IMAGE_NAME} || true &&
                             docker rm production_${IMAGE_NAME} || true &&
                             docker run --name production_${IMAGE_NAME} -d -p 80:${PRODUCTION_HTTP_PORT} -e PORT=${PRODUCTION_HTTP_PORT} ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG}'
-                            '''
+                            """
 
                         }
                         
