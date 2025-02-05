@@ -75,10 +75,6 @@ pipeline{
                       expression {GIT_BRANCH == 'origin/master'}
                   }
                   agent any
-                  environment {
-                      HEREOKU_API_KEY = credentials('heroku_api_key')
-                      }
-
                   steps{
                       echo "========executing Push image in staging and deploy it========"
                       
@@ -109,10 +105,7 @@ pipeline{
                       expression {GIT_BRANCH == 'origin/master'}
                   }
                   agent any
-                  environment {
-                      HEREOKU_API_KEY = credentials('heroku_api_key')
-                      }
-
+                 
                   steps{
                       echo "========executing Push image in production and deploy it========"
                       
