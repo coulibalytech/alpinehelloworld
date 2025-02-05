@@ -77,16 +77,11 @@ pipeline{
                             script {
                                 echo "Pousser l'image Docker vers le registre..."
                                 sh "docker push ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG}"
+                                sh "docker logout"      
                             }
                         }
                     }
-                  post {
-                            always {
-                                echo "Nettoyage du pipeline..."
-                                sh "docker logout"
-                            }
-                        }   
-        
+                 
                stage("Clean container") {
                   agent any
                   steps{
