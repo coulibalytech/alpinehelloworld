@@ -56,20 +56,6 @@ pipeline{
                   }
                   
               }
-              stage("Clean container"){
-                  agent any
-                  steps{
-                      echo "========executing Clean container========"
-                      script{
-                        sh '''
-                        docker stop $IMAGE_NAME
-                        docker rm $IMAGE_NAME
-
-                          '''
-                      }
-                  }
-                  
-              }
               stage("Push image in staging and deploy it"){
                   when{
                       expression {GIT_BRANCH == 'origin/master'}
@@ -79,7 +65,7 @@ pipeline{
                       echo "========executing Push image in staging and deploy it========"
                       
                       script{
-                         sh 'docker save $IMAGE_NAME:$IMAGE_TAG > $IMAGE_NAME.tar'
+                         sh 'docker save $REPOSITORY_NAME/$IMAGE_NAME:${IMAGE_TAG} > $IMAGE_NAME.tar'
                          sshagent (credentials: [SSH_CREDENTIALS_ID]) {
                             sh """
                             echo "Uploading Docker image to Staging EC2"
@@ -108,7 +94,7 @@ pipeline{
                       echo "========executing Push image in production and deploy it========"
                       
                       script{
-                        sh 'docker save $IMAGE_NAME:$IMAGE_TAG > $IMAGE_NAME.tar'
+                        sh 'docker save $REPOSITORY_NAME/$IMAGE_NAME:${IMAGE_TAG} > $IMAGE_NAME.tar'
                         sshagent (credentials: [SSH_CREDENTIALS_ID]) {
                             sh """
                             echo "Uploading Docker image to Production EC2"
@@ -125,6 +111,20 @@ pipeline{
                         
                       }
                   }
+              }
+              stage("Clean container"){
+                  agent any
+                  steps{
+                      echo "========executing Clean container========"
+                      script{
+                        sh '''
+                        docker stop $IMAGE_NAME
+                        docker rm $IMAGE_NAME
+
+                          '''
+                      }
+                  }
+                  
               }
         
 
