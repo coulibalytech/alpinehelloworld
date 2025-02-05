@@ -80,6 +80,12 @@ pipeline{
                             }
                         }
                     }
+                  post {
+                            always {
+                                echo "Nettoyage du pipeline..."
+                                sh "docker logout"
+                            }
+                        }   
         
                stage("Clean container") {
                   agent any
