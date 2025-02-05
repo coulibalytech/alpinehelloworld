@@ -79,7 +79,7 @@ pipeline{
                       echo "========executing Push image in staging and deploy it========"
                       
                       script{
-                         sh 'docker save $REPOSITORY_NAME/$IMAGE_NAME:$IMAGE_TAG > $IMAGE_NAME.tar'
+                         sh 'docker save $IMAGE_NAME:$IMAGE_TAG > $IMAGE_NAME.tar'
                          sshagent (credentials: [SSH_CREDENTIALS_ID]) {
                             sh """
                             echo "Uploading Docker image to Staging EC2"
@@ -108,7 +108,7 @@ pipeline{
                       echo "========executing Push image in production and deploy it========"
                       
                       script{
-                        sh 'docker save $REPOSITORY_NAME/$IMAGE_NAME:$IMAGE_TAG > $IMAGE_NAME.tar'
+                        sh 'docker save $IMAGE_NAME:$IMAGE_TAG > $IMAGE_NAME.tar'
                         sshagent (credentials: [SSH_CREDENTIALS_ID]) {
                             sh """
                             echo "Uploading Docker image to Production EC2"
