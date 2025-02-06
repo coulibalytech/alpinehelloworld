@@ -1,7 +1,7 @@
 pipeline{
           environment{
               IMAGE_NAME = "alpinehellowolrd"
-              IMAGE_TAG = "v1.1"
+              IMAGE_TAG = "v1.2"
               STAGING = "coulibaltech-staging"
               PRODUCTION = "coulibaltech-production"
               REPOSITORY_NAME = "coulibalytech"
@@ -107,7 +107,6 @@ pipeline{
                       echo "========executing Deploy in staging========"
                       
                       script{
-                            sh 'docker save $REPOSITORY_NAME/$IMAGE_NAME:${IMAGE_TAG} > $IMAGE_NAME.tar'
                             sshagent (credentials: [SSH_CREDENTIALS_ID]) {
                                 sh """
                                 echo "Uploading Docker image to Staging EC2"
@@ -135,7 +134,6 @@ pipeline{
                       echo "========executing Deploy in production========"
                       
                       script{
-                            sh 'docker save $REPOSITORY_NAME/$IMAGE_NAME:${IMAGE_TAG} > $IMAGE_NAME.tar'
                             sshagent (credentials: [SSH_CREDENTIALS_ID]) {
                                 sh """
                                 echo "Uploading Docker image to Production EC2"
