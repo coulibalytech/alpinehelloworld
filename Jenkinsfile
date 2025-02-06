@@ -137,7 +137,7 @@ pipeline{
                                 ssh -o StrictHostKeyChecking=no ${PRODUCTION_USER}@${PRODUCTION_IP}
                                 docker pull ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG}
                                 docker rm -f ${IMAGE_NAME}
-                                docker run --name production_${IMAGE_NAME} -d -p 81:${PRODUCTION_HTTP_PORT} -e PORT=${PRODUCTION_HTTP_PORT} ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG}
+                                docker run --name production_${IMAGE_NAME} -d -p 80:${PRODUCTION_HTTP_PORT} -e PORT=${PRODUCTION_HTTP_PORT} ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG}
                                 """
 
                             }
