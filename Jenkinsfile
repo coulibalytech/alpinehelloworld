@@ -108,14 +108,15 @@ pipeline{
                       
                       script{
                             sshagent (credentials: ['ec2_ssh_credentials']) {
-                                sh """
                                 echo "Uploading Docker image to Staging EC2"
+                                sh """
                                 ssh  ${STAGING_USER}@${STAGING_IP} << EOF
-                                    docker stop ${REPOSITORY_NAME}/${IMAGE_NAME}
-                                    docker rm ${REPOSITORY_NAME}/${IMAGE_NAME}
-                                    docker rmi ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG}
-                                    docker pull ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG}
-                                    docker run --name staging_${IMAGE_NAME} -d -p 80:${STAGING_HTTP_PORT} -e PORT=${STAGING_HTTP_PORT} ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG} EOF
+                                docker stop ${REPOSITORY_NAME}/${IMAGE_NAME}
+                                docker rm ${REPOSITORY_NAME}/${IMAGE_NAME}
+                                docker rmi ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG}
+                                docker pull ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG}
+                                docker run --name staging_${IMAGE_NAME} -d -p 80:${STAGING_HTTP_PORT} -e PORT=${STAGING_HTTP_PORT} ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG} 
+                                EOF
                                 """
 
                             }
@@ -135,14 +136,15 @@ pipeline{
                       
                       script{
                             sshagent (credentials: ['ec2_ssh_credentials']) {
-                                sh """
                                 echo "Uploading Docker image to Production EC2"
+                                sh """
                                 ssh  ${PRODUCTION_USER}@${PRODUCTION_IP} << EOF
-                                    docker stop ${REPOSITORY_NAME}/${IMAGE_NAME}
-                                    docker rm ${REPOSITORY_NAME}/${IMAGE_NAME}
-                                    docker rmi ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG}
-                                    docker pull ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG}
-                                docker run --name production_${IMAGE_NAME} -d -p 80:${PRODUCTION_HTTP_PORT} -e PORT=${PRODUCTION_HTTP_PORT} ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG} EOF
+                                docker stop ${REPOSITORY_NAME}/${IMAGE_NAME}
+                                docker rm ${REPOSITORY_NAME}/${IMAGE_NAME}
+                                docker rmi ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG}
+                                docker pull ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG}
+                                docker run --name production_${IMAGE_NAME} -d -p 80:${PRODUCTION_HTTP_PORT} -e PORT=${PRODUCTION_HTTP_PORT} ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG}
+                                EOF
                                 """
 
                             }
