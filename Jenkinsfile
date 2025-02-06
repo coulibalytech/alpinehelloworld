@@ -111,7 +111,6 @@ pipeline{
                                 echo "Uploading Docker image to Staging EC2"
                                 sh """
                                 ssh -o StrictHostKeyChecking=no ${STAGING_USER}@${STAGING_IP}
-                                sudo apt-get update
                                 docker pull ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG}
                                 docker rm -f ${IMAGE_NAME}
                                 docker run --name staging_${IMAGE_NAME} -d -p 80:${STAGING_HTTP_PORT} -e PORT=${STAGING_HTTP_PORT} ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG} 
@@ -137,7 +136,6 @@ pipeline{
                                 echo "Uploading Docker image to Production EC2"
                                 sh """
                                 ssh -o StrictHostKeyChecking=no ${PRODUCTION_USER}@${PRODUCTION_IP}
-                                sudo apt-get update
                                 docker pull ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG}
                                 docker rm -f ${IMAGE_NAME}
                                 docker run --name production_${IMAGE_NAME} -d -p 80:${PRODUCTION_HTTP_PORT} -e PORT=${PRODUCTION_HTTP_PORT} ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG}
