@@ -109,10 +109,15 @@ pipeline{
                             sshagent (credentials: ['ec2_ssh_credentials']) {
                                 echo "Uploading Docker image to Staging EC2"
                                 sh """
+                                commande1="docker pull ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG}"
+                                commande2="docker rm -f ${IMAGE_NAME}"
+                                commande3="docker run --name staging_${IMAGE_NAME} -d -p 80:${STAGING_HTTP_PORT} -e PORT=${STAGING_HTTP_PORT} ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG}" 
                                 ssh -o StrictHostKeyChecking=no ${STAGING_USER}@${STAGING_IP}
-                                docker pull ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG}
-                                docker rm -f ${IMAGE_NAME}
-                                docker run --name staging_${IMAGE_NAME} -d -p 80:${STAGING_HTTP_PORT} -e PORT=${STAGING_HTTP_PORT} ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG} 
+                                -o SendEnv=IMAGE_NAME
+                                -o SendEnv=REPOSITORY_NAME
+                                -o SendEnv=IMAGE_TAG
+                                -o SendEnv=STAGING_HTTP_PORT
+                                -C "$commande1 && $commande2 && $commande3"
                                 """
 
                             }
@@ -134,10 +139,15 @@ pipeline{
                             sshagent (credentials: ['ec2_ssh_credentials']) {
                                 echo "Uploading Docker image to Production EC2"
                                 sh """
+                                commande1="docker pull ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG}"
+                                commande2="docker rm -f ${IMAGE_NAME}"
+                                commande3="docker run --name staging_${IMAGE_NAME} -d -p 80:${PRODUCTION_HTTP_PORT} -e PORT=${PRODUCTION_HTTP_PORT} ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG}" 
                                 ssh -o StrictHostKeyChecking=no ${PRODUCTION_USER}@${PRODUCTION_IP}
-                                docker pull ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG}
-                                docker rm -f ${IMAGE_NAME}
-                                docker run --name production_${IMAGE_NAME} -d -p 80:${PRODUCTION_HTTP_PORT} -e PORT=${PRODUCTION_HTTP_PORT} ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG}
+                                -o SendEnv=IMAGE_NAME
+                                -o SendEnv=REPOSITORY_NAME
+                                -o SendEnv=IMAGE_TAG
+                                -o SendEnv=STAGING_HTTP_PORT
+                                -C "$commande1 && $commande2 && $commande3"
                                 """
 
                             }
