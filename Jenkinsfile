@@ -1,7 +1,7 @@
 pipeline{
           environment{
               IMAGE_NAME = "alpinehellowolrd"
-              IMAGE_TAG = "v1.2"
+              IMAGE_TAG = "v1.3"
               STAGING = "coulibaltech-staging"
               PRODUCTION = "coulibaltech-production"
               REPOSITORY_NAME = "coulibalytech"
