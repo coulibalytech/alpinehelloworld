@@ -7,13 +7,13 @@ pipeline{
               REPOSITORY_NAME = "coulibalytech"
 
             // Staging EC2
-              STAGING_IP = "44.211.159.237"
+              STAGING_IP = "54.174.43.185"
               STAGING_USER = "ubuntu"
               STAGING_DEPLOY_PATH = "/home/ubuntu/app/staging"
               STAGING_HTTP_PORT = "5000" // Port spécifique pour staging
 
              // Production EC2
-              PRODUCTION_IP = "34.238.39.56"
+              PRODUCTION_IP = "54.173.247.138"
               PRODUCTION_USER = "ubuntu"
               PRODUCTION_DEPLOY_PATH = "/home/ubuntu/app/production"
               PRODUCTION_HTTP_PORT = "5000" // Port spécifique pour production
