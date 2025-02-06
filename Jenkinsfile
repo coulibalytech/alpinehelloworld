@@ -110,7 +110,7 @@ pipeline{
                             sshagent (credentials: ['ec2_ssh_credentials']) {
                                 echo "Uploading Docker image to Staging EC2"
                                 sh """
-                                ssh  ${STAGING_USER}@${STAGING_IP} << EOF
+                                ssh -tt ${STAGING_USER}@${STAGING_IP} << EOF
                                 docker stop ${REPOSITORY_NAME}/${IMAGE_NAME}
                                 docker rm ${REPOSITORY_NAME}/${IMAGE_NAME}
                                 docker rmi ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG}
@@ -138,7 +138,7 @@ pipeline{
                             sshagent (credentials: ['ec2_ssh_credentials']) {
                                 echo "Uploading Docker image to Production EC2"
                                 sh """
-                                ssh  ${PRODUCTION_USER}@${PRODUCTION_IP} << EOF
+                                ssh -tt ${PRODUCTION_USER}@${PRODUCTION_IP} << EOF
                                 docker stop ${REPOSITORY_NAME}/${IMAGE_NAME}
                                 docker rm ${REPOSITORY_NAME}/${IMAGE_NAME}
                                 docker rmi ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG}
