@@ -107,7 +107,7 @@ pipeline{
                       echo "========executing Deploy in staging========"
                       
                       script{
-                            sshagent (credentials: ['${SSH_CREDENTIALS_ID}']) {
+                            sshagent (credentials: ['ec2_ssh_credentials']) {
                                 sh """
                                 echo "Uploading Docker image to Staging EC2"
                                 ssh ${STAGING_USER}@${STAGING_IP}'
@@ -134,7 +134,7 @@ pipeline{
                       echo "========executing Deploy in production========"
                       
                       script{
-                            sshagent (credentials: ['${SSH_CREDENTIALS_ID}']) {
+                            sshagent (credentials: ['ec2_ssh_credentials']) {
                                 sh """
                                 echo "Uploading Docker image to Production EC2"
                                 ssh ${PRODUCTION_USER}@${PRODUCTION_IP} '
