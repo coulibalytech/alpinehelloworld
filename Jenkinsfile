@@ -173,7 +173,10 @@ pipeline{
                     }
                     
                 }
-                post {
+               
+            }
+
+           post {
                       success {
                                 slackSend (color: '#00FF00' , message: "SUCCESSFUL: job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
                           }
@@ -182,7 +185,5 @@ pipeline{
                           }
                 }
 
-                
-            }
 
         }
