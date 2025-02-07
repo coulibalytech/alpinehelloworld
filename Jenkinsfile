@@ -112,7 +112,7 @@ pipeline{
                                # defining remote commands
                                remote_cmds="
                                docker pull ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG} &&
-                               docker rm -f ${IMAGE_NAME} || true && 
+                               docker rm -f staging_${IMAGE_NAME} || true && 
                                docker run --name staging_${IMAGE_NAME} -d -p 80:${STAGING_HTTP_PORT} -e PORT=${STAGING_HTTP_PORT} ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG}
                                "
                                # executing remote commands
@@ -141,8 +141,8 @@ pipeline{
                                # defining remote commands
                                remote_cmds="
                                docker pull ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG} &&
-                               docker rm -f ${IMAGE_NAME} || true && 
-                               docker run --name staging_${IMAGE_NAME} -d -p 80:${PRODUCTION_HTTP_PORT} -e PORT=${PRODUCTION_HTTP_PORT} ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG}
+                               docker rm -f production_${IMAGE_NAME} || true && 
+                               docker run --name production_${IMAGE_NAME} -d -p 80:${PRODUCTION_HTTP_PORT} -e PORT=${PRODUCTION_HTTP_PORT} ${REPOSITORY_NAME}/${IMAGE_NAME}:${IMAGE_TAG}
                                "
                                # executing remote commands
                                ssh -o StrictHostKeyChecking=no ${PRODUCTION_USER}@${PRODUCTION_IP} "\$remote_cmds"
