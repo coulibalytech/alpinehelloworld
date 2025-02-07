@@ -1,4 +1,4 @@
-@Library('coulibalytech-shared-library')_
+@Library('coulibalytech-shared-library@master')_
 pipeline{
           environment{
               IMAGE_NAME = "alpinehellowolrd"
