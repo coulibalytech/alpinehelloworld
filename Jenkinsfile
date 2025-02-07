@@ -1,3 +1,4 @@
+@Library('coulibalytech-shared-library')_
 pipeline{
           environment{
               IMAGE_NAME = "alpinehellowolrd"
@@ -177,12 +178,13 @@ pipeline{
             }
 
            post {
-                      success {
-                                slackSend (color: '#00FF00' , message: "SUCCESSFUL: job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
-                          }
-                     failure {
-                                slackSend (color: '#FF0000' , message: "FAILLED: job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
-                          }
+                     always {
+                               script {
+                                         /* Use slackNotifier.groovy from shared library and provide current build result as parameter*/
+                                         clean
+                                         slackNotifier currentBuild.result
+                               }
+                     }
                 }
 
 
