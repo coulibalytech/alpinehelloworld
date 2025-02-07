@@ -181,9 +181,8 @@ pipeline{
            post {
                      always { 
                                script {
-                                         /* Use slackNotifier.groovy from shared library and provide current build result as parameter*/
-                                         clean
-                                         slackNotifier currentBuild.result
+                                 /* Use slackNotifier.groovy from shared library and provide current build result as parameter*/
+                                 slackNotifier currentBuild.result
                                }
                      }
                 }
