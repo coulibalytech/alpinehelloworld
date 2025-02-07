@@ -1,4 +1,5 @@
-@Library('coulibalytech-shared-library')_
+/* import shared library */
+@Library('shared-library')_
 
 pipeline{
           environment{
