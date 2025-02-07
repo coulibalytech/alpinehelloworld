@@ -124,7 +124,17 @@ pipeline{
                         }
                     }
                 }
-
+                stage("Test in staging") {
+                    agent any
+                    steps{
+                        echo "========executing Test staging========"
+                        script{
+                            sh 'curl http://${STAGING_IP}:80 | grep -q "Hello world!"'
+                        }
+                    }
+                    
+                }
+    
                 stage("Deploy in production") {
                   when{
                       expression {GIT_BRANCH == 'origin/master'}
@@ -153,6 +163,16 @@ pipeline{
                         }
                   }
                }
+               stage("Test in production") {
+                    agent any
+                    steps{
+                        echo "========executing Test staging========"
+                        script{
+                            sh 'curl http://${PRODUCTION_IP}:80 | grep -q "Hello world!"'
+                        }
+                    }
+                    
+                }
 
                 
             }
